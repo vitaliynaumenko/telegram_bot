@@ -48,7 +48,7 @@ const userList = [
 
 ];
 const spam = ['шарий', 'чаплыга', 'міха', 'миха', 'чаплига', 'шарій', "шарія", "шария", "зрада"];
-const goodWords = ['чай', 'кава', 'каву', 'пиво', "пивко","півко", "пивку"]
+const goodWords = ['чай', 'кава', 'кофе', 'пиво', "пивко","півко", "пивку"]
 
 const randomNum = arr =>  Math.floor( Math.random() * arr.length)
 
@@ -75,16 +75,21 @@ const chatMembers = async (context)=>{
     // await createKeyBoard(context)
 }
 const checkForSpam = (msg)=>{
-    // if (!msg.message.text.length) {
-    //     console.log('empty')
-    //     return '';
-    // }
-    const words = msg.message.text.split(' ')
+    console.log(msg.message.text.length);
+    if (!msg.message.text.length) {
+        console.log('empty')
+        return '';
+    }
+    const text = msg.message.text
+    if (text) {
+            text.split(' ')
+    }
+
     for (let i = 0; i < words.length; i++){
-        const isSpam = spam.includes(words[i].toLowerCase());
-        const isMatch = goodWords.includes(words[i].toLowerCase());
+        const isSpam = spam.includes(text[i].toLowerCase());
+        const isMatch = goodWords.includes(text[i].toLowerCase());
         if (isMatch){
-            switch (words[i].toLowerCase()) {
+            switch (text[i].toLowerCase()) {
                 case "чай":
                 case 'кава':
                 case 'каву':
@@ -138,7 +143,7 @@ const bot = new Telegraf('749417127:AAGnKBOk3QWi73zSE1ERLPFF7LWFIv7H0Rc', {polli
 bot.start(ctx => chatMembers(ctx) );
 
 bot.help((ctx) => ctx.reply('Send me a sticker'));
-bot.on('message', msg => checkForSpam(msg));
+bot.on('text', msg => checkForSpam(msg));
 // bot.hears(['чай', "кава"], ctx => {
 //     ctx.reply('Мої солоденькі Ви можете випити чай тут:')
 // });
