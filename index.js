@@ -81,45 +81,46 @@ const checkForSpam = (msg)=>{
         return '';
     }
     const text = msg.message.text
-    if (text) {
-            text.split(' ')
+
+    const words = text.split(' ')
+    if (words.length) {
+        for (let i = 0; i < words.length; i++){
+            const isSpam = spam.includes(words[i].toLowerCase());
+            const isMatch = goodWords.includes(words[i].toLowerCase());
+            if (isMatch){
+                switch (words[i].toLowerCase()) {
+                    case "чай":
+                    case 'кава':
+                    case 'каву':
+                        return  msg.replyWithPoll( "Ви можете вибрати місце зустрічі:", ['Терем', "Кофеїн", "Топольок", "Сільмаг", "Наташа", "Амік"], {
+                            // open_period: true,
+                            is_anonymous: false,
+                            allows_multiple_answers: true
+                        });
+
+                    case'пиво':
+                    case"пивко":
+                    case"пивку":
+                    case"півко":
+                        return  msg.replyWithPoll( "Солоденькі ви хочете сьогодні провести гарно вечір?", ['Так', 'Ні', 'Під каблуком'], {
+                            // open_period: 10,
+                            is_anonymous: false,
+                            allows_multiple_answers: true
+                        });
+
+                }
+            }
+            if (isSpam){
+                return Promise.all([
+                    msg.sendMessage("Ще раз побачу це лайно в цьому чаті сядеш на пляшку"),
+                    msg.replyWithPhoto({
+                        source: './img/bottle.jpeg'
+                    })
+                ])
+            }
+        }
     }
 
-    for (let i = 0; i < words.length; i++){
-        const isSpam = spam.includes(text[i].toLowerCase());
-        const isMatch = goodWords.includes(text[i].toLowerCase());
-        if (isMatch){
-            switch (text[i].toLowerCase()) {
-                case "чай":
-                case 'кава':
-                case 'каву':
-                   return  msg.replyWithPoll( "Ви можете вибрати місце зустрічі:", ['Терем', "Кофеїн", "Топольок", "Сільмаг", "Наташа", "Амік"], {
-                                // open_period: true,
-                                is_anonymous: false,
-                                allows_multiple_answers: true
-                            });
-
-                case'пиво':
-                case"пивко":
-                case"пивку":
-                case"півко":
-                   return  msg.replyWithPoll( "Солоденькі ви хочете сьогодні провести гарно вечір?", ['Так', 'Ні', 'Під каблуком'], {
-                        // open_period: 10,
-                        is_anonymous: false,
-                        allows_multiple_answers: true
-                    });
-
-          }
-        }
-        if (isSpam){
-            return Promise.all([
-                msg.sendMessage("Ще раз побачу це лайно в цьому чаті сядеш на пляшку"),
-                msg.replyWithPhoto({
-                source: './img/bottle.jpeg'
-            })
-            ])
-        }
-   }
 }
 
 const addAction = (name, src=false, text)=>{
@@ -135,6 +136,7 @@ bot.action(name, async (ctx)=>{
         }
     }catch (e) {
         console.log(e)
+
     }
 })
 }
