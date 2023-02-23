@@ -14,5 +14,8 @@
     "dotenv": "^16.0.3",
     "nodemon": "^2.0.20",
     "telegraf": "^4.11.2"
+  },
+  "dependencies": {
+    "openai": "^3.1.0"
   }
 }

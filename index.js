@@ -1,4 +1,5 @@
 const { Telegraf, inlineKeyboard, Markup, session } = require('telegraf');
+const {OpenAi} = require('openai')
 const process = require("nodemon");
 
 const userList = [
@@ -50,6 +51,7 @@ const userList = [
 const spam = ['шарий', 'чаплыга', 'міха', 'миха', 'чаплига', 'шарій', "шарія", "шария", "зрада"];
 const goodWords = ['чай', 'кава', 'кофе', 'пиво', "пивко","півко", "пивку"]
 
+const openAi = new OpenAi('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')
 const randomNum = arr =>  Math.floor( Math.random() * arr.length)
 
 const createKeyBoard = async (ctx)=>{
@@ -143,6 +145,24 @@ bot.action(name, async (ctx)=>{
 const bot = new Telegraf('749417127:AAGnKBOk3QWi73zSE1ERLPFF7LWFIv7H0Rc', {polling:true});
 
 bot.start(ctx => chatMembers(ctx) );
+bot.command('bot_start_chat', async ctx =>{
+    try {
+        const userMsg = ctx.message.text;
+
+        const response = openAi.complete({
+            engine: 'text-davinci-003',
+            prompt: userMsg,
+            maxTokens: 1000,
+            temperature: 0.5,
+            n: 1,
+            stop: '\n'
+        })
+        ctx.reply(response.data.choices[0].text);
+        ctx.reply('Sorry, I was unable to process your message at this time.');
+    }catch (e){
+        console.log(e)
+    }
+})
 
 bot.help((ctx) => ctx.reply('Send me a sticker'));
 bot.on('text', msg => checkForSpam(msg));
