@@ -6,7 +6,7 @@ const botApiKey = process.env.BOT_API
 // console.log(botApiKey);
 // console.log(process.env.BOT_API);
 
-const bot = new Telegraf(botApiKey);
+const bot = new Telegraf('749417127:AAGnKBOk3QWi73zSE1ERLPFF7LWFIv7H0Rc');
 
 const goodWords = ['чай', 'кава', 'кофе', 'пиво', "пивко","півко", "пивку"]
 const spam = ['шарий', 'чаплыга', 'міха', 'миха', 'чаплига', 'шарій', "шарія", "шария", "зрада"];
