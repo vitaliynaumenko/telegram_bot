@@ -1,57 +1,15 @@
 const { Telegraf, inlineKeyboard, Markup, session } = require('telegraf');
-const {OpenAi} = require('openai')
-const process = require("nodemon");
+const { Configuration, OpenAIApi} = require('openai')
+require('dotenv').config()
+// const process = require("nodemon");
+const config = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY
+})
+const openAi = new OpenAIApi(config);
+const bot = new Telegraf(process.env.BOT_API_KEY, {polling:true});
 
-const userList = [
-    {
-    userId:1,
-    userName: 'Vasili',
-    count: 0
-    },
-    {
-        userId:3,
-        userName: 'Max',
-        count: 0
-    },
-    {
-        userId:5,
-        userName: 'Oleg',
-        count: 0
-    },
-    {
-        userId:55,
-        userName: 'Nik',
-        count: 0
-    },
-    {
-        userId:34,
-        userName: 'Igor',
-        count: 0
-    },
-    {
-        userId:67,
-        userName: 'NoName',
-        count: 0
-    },{
-        userId:1231,
-        userName: 'YYUUI',
-        count: 0
-    },{
-        userId:13456,
-        userName: 'asdasfdsg',
-        count: 0
-    },
-    {
-        userId:166,
-        userName: 'nooojdfh',
-        count: 0
-    },
-
-];
-const spam = ['шарий', 'чаплыга', 'міха', 'миха', 'чаплига', 'шарій', "шарія", "шария", "зрада"];
 const goodWords = ['чай', 'кава', 'кофе', 'пиво', "пивко","півко", "пивку"]
-
-const openAi = new OpenAi('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')
+const spam = ['шарий', 'чаплыга', 'міха', 'миха', 'чаплига', 'шарій', "шарія", "шария", "зрада"];
 const randomNum = arr =>  Math.floor( Math.random() * arr.length)
 
 const createKeyBoard = async (ctx)=>{
@@ -65,19 +23,18 @@ const createKeyBoard = async (ctx)=>{
         console.log(e)
     }
 }
-const whoIsGay =  (arr=[])=>{
-    if (!arr && !arr.length)return;
-    const random = randomNum(arr)
-    const gay =  userList[random].userName
-
-   return gay;
-}
+// const whoIsGay =  (arr=[])=>{
+//     if (!arr && !arr.length)return;
+//     const random = randomNum(arr)
+//     const gay =  userList[random].userName
+//
+//    return gay;
+// }
 const chatMembers = async (context)=>{
     await context.replyWithHTML(`Привіт мій солоденький ${context.message.from.username ? context.message.from.username : context.message.from.first_name }`);
     // await createKeyBoard(context)
 }
 const checkForSpam = (msg)=>{
-    console.log(msg.message.text.length);
     if (!msg.message.text.length) {
         console.log('empty')
         return '';
@@ -125,6 +82,37 @@ const checkForSpam = (msg)=>{
 
 }
 
+const chatGPT = async (ctx)=>{
+    const { message } = ctx.update;
+    const prompt = message.text.replace('/bot_start_chat', '').trim();
+    console.log('prompt', prompt);
+    console.log('msg', ctx.message.text);
+
+    bot.on('message', async ctx =>{
+        try {
+            const response = await openAi.createCompletion({
+                model: "davinci",
+                prompt: prompt,
+                temperature: 0.9,
+                max_tokens: 150,
+                top_p: 1,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.6,
+                stop: ["Human:", " AI:"],
+            })
+            // console.log('response.data.choices', response.data.choices[0]);
+            ctx.reply(response.data.choices[0].text);
+        }catch (e){
+            console.log(e)
+            ctx.reply('Sorry, I was unable to process your message at this time.');
+        }
+    })
+
+
+
+}
+
+
 const addAction = (name, src=false, text)=>{
 bot.action(name, async (ctx)=>{
     try{
@@ -142,37 +130,19 @@ bot.action(name, async (ctx)=>{
     }
 })
 }
-const bot = new Telegraf('749417127:AAGnKBOk3QWi73zSE1ERLPFF7LWFIv7H0Rc', {polling:true});
-
 bot.start(ctx => chatMembers(ctx) );
-bot.command('bot_start_chat', async ctx =>{
-    try {
-        const userMsg = ctx.message.text;
-
-        const response = openAi.complete({
-            engine: 'text-davinci-003',
-            prompt: userMsg,
-            maxTokens: 1000,
-            temperature: 0.5,
-            n: 1,
-            stop: '\n'
-        })
-        ctx.reply(response.data.choices[0].text);
-        ctx.reply('Sorry, I was unable to process your message at this time.');
-    }catch (e){
-        console.log(e)
-    }
-})
+bot.command('bot_start_chat', ctx => chatGPT(ctx))
 
 bot.help((ctx) => ctx.reply('Send me a sticker'));
 bot.on('text', msg => checkForSpam(msg));
+
 // bot.hears(['чай', "кава"], ctx => {
 //     ctx.reply('Мої солоденькі Ви можете випити чай тут:')
 // });
 
 bot.launch();
-addAction('btn_no', '', 'Сідай на бутилку гімно')
-addAction('btn_yes', '', `Раз Два Три Підар сьогодні ти ${whoIsGay(userList)}`)
+// addAction('btn_no', '', 'Сідай на бутилку гімно')
+// addAction('btn_yes', '', `Раз Два Три Підар сьогодні ти ${whoIsGay()}`)
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
