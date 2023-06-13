@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "package.json"
+    }
+  ],
+  "env": {
+    "BOT_API_KEY": "749417127:AAGnKBOk3QWi73zSE1ERLPFF7LWFIv7H0Rc"
+  }
+}
